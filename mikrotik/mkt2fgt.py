@@ -8,14 +8,33 @@ from collections import defaultdict
 from os.path import isfile
 from sys import exit
 
+# helpers
+def valid_ip(str_ip):
+    try:
+        ip=ipaddress.ip_address(str_ip)
+    except:
+        ip=None
+    
+    return(ip)
+
+def valid_network(str_network):
+    try:
+        network=ipaddress.ip_network(str_network)
+    except:
+        network=None
+    
+    return(network)
+
 
 # command line
 parser = argparse.ArgumentParser(description="Converts mikrotik configuration sections to fortigate")
 parser.add_argument("--mikrotik-config", help="mikrotik config file", required=True)
 parser.add_argument("--fortigate-config", help="output forgitate config file", required=True)
 parser.add_argument("--map-interfaces", nargs="*", help="[MKT_IF:FGT_IF ... ]. replace mikrotik interfaces with its fortigate counterparts.")
+parser.add_argument("--addresses", nargs="*", help="[INTERFACE ...] generate interface address configuration for INTERFACE, * for all", default=False, )
+parser.add_argument("--dhcp-servers", nargs="*", help="[SERVER ...]. dhcp servers to migrate, * for all")
 parser.add_argument("--ppp-users", help="convert ppp users to local users", default=False, action='store_true')
-parser.add_argument("--addresses", nargs="*", help="[INTERFACE ...] generate interface address configuration", default=False, )
+
 args = parser.parse_args()
 
 # open mikrotik config file
@@ -111,7 +130,7 @@ if args.addresses is not None:
     
     if "*" in args.addresses:
         if len(args.addresses) != 1:
-            print("*** ERROR: you shouldn't specify multiple and use \"*\"")
+            print("*** ERROR: you shouldn't specify multiple interfaces and use \"*\"")
             exit(-1)
         else:
             print(">>> migrating addresses for all interfaces")
@@ -129,7 +148,7 @@ if args.addresses is not None:
         for address in config["/ip/address"]:
             # disabled?
             (cmd, opt) = address
-            if "disabled" in opt and opt["disabled"] == "yes":
+            if cmd != "add" or ("disabled" in opt and opt["disabled"] == "yes"):
                 continue
 
             if all_interfaces is True or opt["interface"].casefold() in interfaces:
@@ -191,11 +210,230 @@ if args.addresses is not None:
 
                 o.write("    next\n")
                 
-            o.write("end")
+            o.write("end\n")
         else:
             print("!!! no interface addresses to migrate")
     else:
         print("!!! no interface addresses to migrate")
+
+# dhcp servers
+if args.dhcp_servers is not None:
+    
+    if "*" in args.dhcp_servers:
+        if len(args.dhcp_servers) != 1:
+            print("*** ERROR: you shouldn't specify multiple servers and use \"*\"")
+            exit(-1)
+        else:
+            print(">>> migrating all dhcp servers")
+            all_dhcp = True
+    else:
+        all_dhcp = False
+        dhcp_servers = [x.casefold() for x in args.addresses]
+        print(">>> migrating dhcp servers {dhcp_servers}".format(
+            dhcp_servers=", ".join(dhcp_servers)
+        ))
+
+    # check for dhcp-server network and server
+
+    # build dhcp networks list
+    dhcp_networks = dict()
+    for dhcp_network in config["/ip/dhcp-server/network"]:
+        (cmd, opt) = dhcp_network
+        
+        if cmd != "add":
+            continue
+
+        # network
+        network = { 
+            "address": valid_network(opt["address"])
+        }
+
+        # valid network is required
+        if network["address"] is None:
+            continue
+
+        # default_gateway
+        if "gateway" in opt:
+            network["gateway"] = valid_ip(opt["gateway"])
+
+        # dns servers
+        if "dns-server" in opt:
+            dnslist = list()
+            for dns in opt["dns-server"].split(","):
+                dnssrv=ipaddress.ip_address(dns)
+                if dnssrv is not None:
+                    dnslist.append(dnssrv)
+            
+            network["dns"] = dnslist
+
+        network["domain"] = opt["domain"] if "domain" in opt else None
+
+        dhcp_networks[str(network["address"])] = network
+
+    # build ip pool list
+    ip_pools = dict()
+    for ip_pool in config["/ip/pool"]:
+        (cmd, opt) = ip_pool
+        ranges=list()
+
+        if cmd != "add" or ("disabled" in opt and opt["disabled"] == "yes"):
+            continue
+
+        ranges_tmp = opt["ranges"].split(",")
+        for r in ranges_tmp:
+            (s, e) = r.split("-")
+            start_ip = valid_ip(s)
+            end_ip = valid_ip(e)
+            if start_ip is None or end_ip is None:
+                print("*** ERROR invalid pool range {r} in pool {pool}".format(
+                    r=r,
+                    pool=opt["name"]
+                ))
+
+            ranges.append((start_ip, end_ip))
+        
+        ip_pools[opt["name"]] = ranges
+
+    # build dhcp server list
+    dhcp_servers = list()
+    for dhcp_server in config["/ip/dhcp-server"]:
+        (cmd, opt) = dhcp_server
+
+        if cmd != "add" or ("disabled" in opt and opt["disabled"] == "yes"):
+            continue
+
+        name = opt["name"]
+        print("--- analyzing dhcp server {server}".format(
+            server=opt["name"]
+        ))
+        dhcp_server = dict()
+
+        # try to find out which dhcp network matches this server by using the interface IPs
+        interface = ifmap[opt["interface"]] if opt["interface"] in ifmap else opt["interface"]
+        dhcp_server["interface"] = interface
+        dhcp_server["name"] = opt["name"]
+
+        if interface in ifaddress:
+            found = False
+            for i in ifaddress[interface]:
+                (ip, network) = i
+                for n in dhcp_networks:
+                    if ip in dhcp_networks[n]["address"]:
+                        found = True
+                        print("--- found dhcp server options for server {server}".format(
+                            server=opt["name"]
+                        ))
+                        dhcp_server["network"] = dhcp_networks[n]["address"]
+                        dhcp_server["dns"] = dhcp_networks[n]["dns"] if "dns" in dhcp_networks[n] else None
+                        dhcp_server["gateway"] = dhcp_networks[n]["gateway"] if "gateway" in dhcp_networks[n] else None
+                        dhcp_server["domain"] = dhcp_networks[n]["domain"] if "domain" in dhcp_networks[n] else None
+                        break
+
+                if found:
+                    break
+
+        else:
+            print("!!! did not find dhcp options for server {server}".format(
+                server=opt["name"]
+            ))
+        
+        if opt["address-pool"] in ip_pools.keys():
+            dhcp_server["pool"] = ip_pools[opt["address-pool"]]
+            print("--- found ip pool for dhcp server {server}".format(
+                server=opt["name"]
+            ))
+
+        dhcp_servers.append(dhcp_server)
+    
+    
+    o.write("\nconfig system dhcp server\n")
+    for dhcp_server in dhcp_servers:
+        o.write("    edit 0\n")
+        # domain
+        if dhcp_server["domain"] is not None:
+            o.write("        set domain \"{domain}\"\n".format(
+                domain=dhcp_server["domain"]
+            ))        
+        # gateway
+        if dhcp_server["gateway"] is not None:
+            o.write("        set default-gateway {gateway}\n".format(
+                gateway=dhcp_server["gateway"]
+            ))
+
+        # network
+        if dhcp_server["network"] is not None:
+            o.write("        set netmask {netmask}\n".format(
+                netmask=dhcp_server["network"].netmask
+            ))
+
+        # interface
+        o.write("        set interface \"{interface}\"\n".format(
+            interface=dhcp_server["interface"]
+        ))
+
+        if len(dhcp_server["pool"]) > 0:
+            o.write("        config ip-range\n")
+
+            for (s,e) in dhcp_server["pool"]:
+                o.write("            edit 0\n")
+                o.write("                set start-ip {ip}\n".format(ip=s))
+                o.write("                set end-ip {ip}\n".format(ip=s))
+                o.write("            next\n")
+
+            o.write("        end\n")
+        o.write("    next\n")
+        print("--- configured dhcp server for interface {interface}".format(
+            interface=dhcp_server["interface"]
+        ))
+
+        # reserved addresses
+        limit = 200 
+        o.write("    config reserved-address\n")
+        for rsvadr in config["/ip/dhcp-server/lease"]:
+            (cmd, opt) = rsvadr
+            if cmd != "add":
+                continue
+
+            if "server" not in opt or dhcp_server["name"] != opt["server"] or "address" not in opt or "mac-address" not in opt or "server" not in opt:
+                continue
+
+            ip=valid_ip(opt["address"])
+            if ip is None:
+                continue
+        
+            o.write("        edit 0\n")
+            o.write("            set ip {ip}\n".format(
+                ip=ip
+            ))
+            o.write("            set mac {mac}\n".format(
+                mac=opt["mac-address"].casefold()
+            ))
+
+            if "comment" in opt:
+                o.write("            set description \"{comment}\"\n".format(
+                    comment=opt["comment"]
+                ))
+
+            o.write("        next\n")
+            limit -= 1
+            if limit <= 0:
+                print("!!! output truncated: max 200 dhcp leases per network")
+                break
+
+
+        o.write("    end\n")
+
+
+    o.write("end\n")
+
+
+
+
+
+            
+
+        
+
 
 #
 o.close()
