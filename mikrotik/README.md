@@ -16,11 +16,6 @@ Archivo donde se escribirá el script de FortiOS.
 
 Convierte la sección usuarios de PPP a usuarios locales de FortiGate (*config user local*).
 
-#### Ejemplos
-
-- --dhcp-servers LAN1 LAN2
-- --dhcp-servers *
-
 ### --map-interfaces `MKT_IF:FGT_IF ...`
 
 Cambiar las referencias de las interfaces de Mikrotik `MKT_IF` a interfaces de FortiGate `FGT_IF`. Es **case insensitive** para la interfaz de Mikrotik, y **sensitive** para las de FortiGate.
@@ -45,3 +40,8 @@ Usar "*" para migrar todas las interfaces.
 
 Listado de **DHCP servers y leases** a migrar.
 Usar "*" para migrar todos los DHCP servers. Solo se migrarán aquellos que estén habilitados.
+
+#### Ejemplos
+
+- --dhcp-servers LAN1 LAN2
+- --dhcp-servers *
