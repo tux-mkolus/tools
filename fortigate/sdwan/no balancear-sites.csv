@@ -3,7 +3,7 @@ afip,200.1.116.0/24,AS16701,Administración Federal De Ingresos Públicos (AFIP)
 interbanking,201.221.120.0/24,AS52394,InterBanking S.A.,
 bancodegalicia,161.190.0.0/16,AS13474,Banco de Galicia y Buenos Aires,
 bancopatagonia,45.224.184.0/24,AS265859,Banco Patagonia S.A.,
-bancosatander_1,200.0.252.0/24,AS20305,Banco Rio de la Plata S.A.,
-bancosatander_2,200.10.117.0/24,AS20305,Banco Rio de la Plata S.A.,
-bancosatander_3,200.61.38.0/25,AS20305,Banco Rio de la Plata S.A.,
-bancosatander_4,200.70.26.0/24,AS20305,Banco Rio de la Plata S.A.,Que poronga este banco
+bancosatander_1,200.0.252.0/24,AS20305,Banco Rio de la Plata S.A.,Banco Satander
+bancosatander_2,200.10.117.0/24,AS20305,Banco Rio de la Plata S.A.,Banco Satander
+bancosatander_3,200.61.38.0/25,AS20305,Banco Rio de la Plata S.A.,Banco Satander
+bancosatander_4,200.70.26.0/24,AS20305,Banco Rio de la Plata S.A.,Banco Satander
