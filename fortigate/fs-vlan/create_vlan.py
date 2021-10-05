@@ -6,6 +6,8 @@ parser = argparse.ArgumentParser(description="FortiSwitch VLAN interface generat
 parser.add_argument("--fortiswitch_interface", help="fortiswitch interface. default: fortilink", default="fortilink")
 parser.add_argument("--interface", help="interface name", required=True)
 parser.add_argument("--vlanid", help="vlan id", type=int, required=True)
+parser.add_argument("--vdom", help="vdom", default="root")
+parser.add_argument("--address_object", help="address objects, defaults to net-INTERFACE")
 parser.add_argument("--ip", help="interface IP address in CIDR format")
 parser.add_argument("--role", help="interface role. {lan|wan|dmz}", choices=["lan", "wan", "dmz"])
 parser.add_argument("--description", help="interface description")
@@ -56,6 +58,7 @@ if args.allow_fabric:
 print("config system interface")
 print("    edit \"{interface}\"".format(
     interface=args.interface))
+print("        set vdom \"root\"")
 print("        set ip {ip} {mask}".format(
     ip=interface["ip"],
     mask=interface["network"].netmask
@@ -87,11 +90,25 @@ print("        set vlanid {vlanid}".format(
 print("    next")
 print("end")
 
+# firewall/address
+address_object = args.address_object if args.address_object is not None else "net-" + args.interface
+print("\nconfig firewall address")
+print("    edit \"{address_object}\"".format(
+    address_object=address_object
+))
+print("        set subnet {subnet} {mask}".format(
+    subnet=interface["network"].network_address,
+    mask=interface["network"].netmask
+))
+print("    next")
+print("end")
+
+
 # system/ntp
 if args.enable_ntp:
     print("\nconfig system ntp")
     print("    set server-mode enable")
-    print("    append member \"{interface}\"".format(
+    print("    append interface \"{interface}\"".format(
         interface=args.interface
     ))
     print("end")
@@ -109,6 +126,12 @@ if args.enable_dns:
 if args.enable_dhcp:
     print("\nconfig system dhcp server")
     print("    edit 0")
+
+    # lease time
+    if args.dhcp_lease:
+        print("        set lease-time {dhcp_lease}".format(
+            dhcp_lease=args.dhcp_lease
+        ))
 
     # ntp
     if args.enable_ntp:
@@ -137,7 +160,7 @@ if args.enable_dhcp:
 
     # dns domain
     if args.dhcp_dns_domain:
-        print("        set dns domain \"{domain}\"".format(
+        print("        set domain \"{domain}\"".format(
             domain=args.dhcp_dns_domain
         ))
 
@@ -168,7 +191,7 @@ if args.enable_dhcp:
         ranges.append((interface["network"][1], interface["network"][gw_offset-1]))
         ranges.append((interface["network"][gw_offset+1], interface["network"][-2]))
 
-    print("        config range")
+    print("        config ip-range")
     for (s, e) in ranges:
         print("            edit 0")
         print("                set start-ip {start}".format(
