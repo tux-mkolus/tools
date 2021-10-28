@@ -1,0 +1,4 @@
+﻿protocol,external interface,external ip,external port,internal interface,internal ip,internal port,group,comment
+tcp,wan-teco,190.228.114.10,80,lan-legacy,192.168.7.3,80,web,pagina web
+tcp,wan-teco,190.228.114.10,443,lan-legacy,192.168.7.3,443,web,pagina web
+udp,wan-claro,190.221.161.213,53,lan-legacy,192.168.7.13,53,,DNS

@@ -30,7 +30,7 @@ def valid_network(str_network):
 parser = argparse.ArgumentParser(description="Converts mikrotik configuration sections to fortigate")
 parser.add_argument("--mikrotik-config", help="mikrotik config file", required=True)
 parser.add_argument("--fortigate-config", help="output forgitate config file", required=True)
-parser.add_argument("--map-interfaces", nargs="*", help="[MKT_IF:FGT_IF ... ]. replace mikrotik interfaces with its fortigate counterparts.")
+parser.add_argument("--map-interfaces", nargs="*", help="[MKT_IF:FGT_IF ... ]. replace mikrotik interfaces with its fortigate counterparts.", action='extend')
 parser.add_argument("--addresses", nargs="*", help="[INTERFACE ...] generate interface address configuration for INTERFACE, * for all", default=False, )
 parser.add_argument("--dhcp-servers", nargs="*", help="[SERVER ...]. dhcp servers to migrate, * for all")
 parser.add_argument("--ppp-users", help="convert ppp users to local users", default=False, action='store_true')
@@ -80,7 +80,11 @@ config = dict()
 current_line = 1
 current_section = None
 for l in f.readlines():
-    tokens = shlex.split(l)
+    try:
+        tokens = shlex.split(l)
+    except:
+        print(l)
+        exit(-1)
 
     # comment
     if tokens[0][0] == "#":

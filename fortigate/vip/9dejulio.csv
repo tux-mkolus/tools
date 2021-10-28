@@ -1,0 +1,15 @@
+﻿protocol,external interface,external ip,external port,internal interface,internal ip,internal port,comment,observaciones
+tcp,wan1,181.13.142.2,3391,internal,192.168.0.75,3389,,recomendar vpn
+tcp,wan1,181.13.142.2,7390,internal,192.168.0.76,3389,,recomendar vpn
+tcp,wan1,181.13.142.2,81,internal,192.168.0.92,80,,
+tcp,wan1,181.13.142.2,7777,internal,192.168.0.176,80,,
+tcp,wan1,181.13.142.2,5222,internal,192.168.0.101,5222,,posible recomendación de VPN
+tcp,wan1,181.13.142.2,777,internal,192.168.0.146,8080,,posible recomendación de VPN
+tcp,wan1,181.13.142.2,778,internal,192.168.0.201,80,,
+tcp,wan1,181.13.142.2,779,internal,192.168.0.146,3306,,recomendar vpn
+tcp,wan1,181.13.142.2,4000,internal,192.168.0.201 ,4000,,posible recomendación de VPN
+tcp,wan1,181.13.142.2,6565,internal,192.168.0.201 ,6565,,
+tcp,wan1,181.13.142.2,800,internal,192.168.0.176,3306,,recomendar vpn
+tcp,wan1,181.13.142.2,707,internal,192.168.0.76,80,,
+tcp,wan1,181.13.142.2,708,internal,192.168.0.76,3306,,recomendar vpn
+tcp,wan1,181.13.142.2,7081,internal,192.168.0.1,81,,mikrotik
