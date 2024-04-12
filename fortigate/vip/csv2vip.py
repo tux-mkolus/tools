@@ -180,9 +180,9 @@ for row in csv_input:
         print(f"\tline {line: 2} Invalid internal IP {internal_ip}")
         abort = True
     
-    internal_port = validate_port(row["external port"])
+    internal_port = validate_port(row["internal port"])
     if internal_port is None:
-        print(f"\tline {line: 2} Invalid external port {external_port}")
+        print(f"\tline {line: 2} Invalid external port {internal_port}")
         abort=True
 
     protocol=row["protocol"].strip().casefold()
