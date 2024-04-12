@@ -1,0 +1,17 @@
+# {{ server_name }}
+# ⚠️Cambiar server id en "edit" antes de usar.
+config system dhcp server
+    edit {{ server_id }}
+        config reserved-address
+{%- for lease in leases %}
+                edit {{ loop.index }}
+                    set ip {{ lease.ip }}
+                    set mac {{ lease.mac }}
+{%- if lease.comment %}
+                    set description "{{ lease.comment }}"
+{%- endif %}
+                next
+{%- endfor %}
+        end
+    next
+end
