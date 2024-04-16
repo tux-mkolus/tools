@@ -72,9 +72,13 @@ for line in config_lines[leases_config_line+1:]:
     tokens = shlex.split(line)
     if tokens[0] == "add":
         lease = defaultdict(lambda: None)
+
         for token in tokens[1:]:
             (k, v) = token.split("=", maxsplit=1)
             lease[k] = v
+
+        if lease["disabled"] == "yes":
+            continue
 
         if lease["server"] not in dhcp_servers:
             dhcp_servers[lease["server"]] = DHCPServer(lease["server"])
