@@ -3,3 +3,6 @@
 sample.conf
 tmp*
 launch.json
+*.tfvars
+*.tf
+vips.csv
