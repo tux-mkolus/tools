@@ -1,0 +1,12 @@
+resource "fortios_firewall_vip" "{{ resource_name }}" {
+  name    = "{{ vip_name }}"
+  extintf = "{{ vip_extintf }}"
+  extip   = "{{ vip_extip }}"
+  mappedip    { range = "{{ vip_mappedip }}" }
+  protocol    = "{{ vip_protocol }}"
+  portforward = "enable"
+  extport     = "{{ vip_extport }}"
+  mappedport  = "{{ vip_mappedport }}"
+}
+
+

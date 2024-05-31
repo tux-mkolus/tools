@@ -1,0 +1,14 @@
+resource "fortios_firewall_policy" "{{ resource_name }}" {
+  name    = "{{ policy_name }}"
+  action = "accept"
+  logtraffic = "all"
+  schedule = "always"
+  status = "enable"
+  dstaddr { name = fortios_firewall_vip.{{ vip_resource_name }}.name }
+  dstintf { name = "{{ policy_intintf }}" }
+  srcintf { name = "{{ policy_extintf }}" }
+  srcaddr { name = {{ policy_source }} }
+  service { name = {{ policy_service }} }
+}
+
+

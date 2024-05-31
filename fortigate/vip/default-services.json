@@ -1,0 +1,138 @@
+{
+   "DNS": {
+     "tcp-portrange": "53",
+     "udp-portrange": "53"
+   },
+   "HTTP": {
+     "tcp-portrange": "80"
+   },
+   "HTTPS": {
+     "tcp-portrange": "443"
+   },
+   "IMAP": {
+     "tcp-portrange": "143"
+   },
+   "IMAPS": {
+     "tcp-portrange": "993"
+   },
+   "LDAP": {
+     "tcp-portrange": "389"
+   },
+   "DCE-RPC": {
+     "tcp-portrange": "135",
+     "udp-portrange": "135"
+   },
+   "POP3": {
+     "tcp-portrange": "110"
+   },
+   "POP3S": {
+     "tcp-portrange": "995"
+   },
+   "SAMBA": {
+     "tcp-portrange": "139"
+   },
+   "SMTP": {
+     "tcp-portrange": "25"
+   },
+   "SMTPS": {
+     "tcp-portrange": "465"
+   },
+   "KERBEROS": {
+     "tcp-portrange": "88,464"
+   },
+   "LDAP_UDP": {
+     "udp-portrange": "389"
+   },
+   "SMB": {
+     "tcp-portrange": "445"
+   },
+   "FTP": {
+     "tcp-portrange": "21"
+   },
+   "GRE": {
+     "protocol-number": "47"
+   },
+   "AH": {
+     "protocol-number": "51"
+   },
+   "ESP": {
+     "protocol-number": "50"
+   },
+   "BGP": {
+     "tcp-portrange": "179",
+     "udp-portrange": ""
+   },
+   "DHCP": {
+     "udp-portrange": "67-68"
+   },
+   "H323": {
+     "tcp-portrange": "1720,1503",
+     "udp-portrange": "1719"
+   },
+   "IKE": {
+     "udp-portrange": "500,4500"
+   },
+   "L2TP": {
+     "tcp-portrange": "1701",
+     "udp-portrange": "1701"
+   },
+   "NFS": {
+     "tcp-portrange": "111,2049",
+     "udp-portrange": "111,2049"
+   },
+   "NTP": {
+     "tcp-portrange": "123",
+     "udp-portrange": "123"
+   },
+   "OSPF": {
+     "protocol-number": "89"
+   },
+   "PPTP": {
+     "tcp-portrange": "1723"
+   },
+   "RIP": {
+     "udp-portrange": "520"
+   },
+   "SIP": {
+     "tcp-portrange": "5060",
+     "udp-portrange": "5060"
+   },
+   "SNMP": {
+     "tcp-portrange": "161-162",
+     "udp-portrange": "161-162"
+   },
+   "SSH": {
+     "tcp-portrange": "22"
+   },
+   "SYSLOG": {
+     "udp-portrange": "514"
+   },
+   "TELNET": {
+     "tcp-portrange": "23"
+   },
+   "TFTP": {
+     "udp-portrange": "69"
+   },
+   "MS-SQL": {
+     "tcp-portrange": "1433,1434"
+   },
+   "MYSQL": {
+     "tcp-portrange": "3306"
+   },
+   "RDP": {
+     "tcp-portrange": "3389"
+   },
+   "VNC": {
+     "tcp-portrange": "5900"
+   },
+   "DHCP6": {
+     "udp-portrange": "546,567"
+   },
+   "RADIUS": {
+     "udp-portrange": "1812,1813"
+   },
+   "RTSP": {
+     "tcp-portrange": "554,7070,8554",
+     "udp-portrange": "554"
+   }
+ }

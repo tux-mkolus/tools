@@ -1,0 +1,14 @@
+{% for name, data in services.services | dictsort -%}
+{% if 1 %} 
+resource "fortios_firewallservice_custom" "{{ name }}" {
+  name          = "{{ name }}"
+  protocol      = "TCP/UDP/SCTP"
+{% if data["tcp-portranges"]|length > 0 %}
+  tcp_portrange = "{{ data["tcp-portranges"]|join(' ') }}"
+{% endif %}
+{% if data["udp-portranges"]|length > 0 %}
+  udp_portrange = "{{ data["udp-portranges"]|join(' ') }}"
+{% endif %}
+}
+{% endif %}
+{% endfor %}
