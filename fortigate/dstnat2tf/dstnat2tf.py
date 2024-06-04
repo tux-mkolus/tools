@@ -3,7 +3,7 @@ import argparse
 import os
 import sys
 import json
-from nat import NetworkMap, InterfaceMap, Services, format_iptables
+from nat import NetworkMap, InterfaceMap, Services, format_iptables, format_csv
 from rich.console import Console
 from rich.table import Table
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
@@ -152,7 +152,7 @@ if not os.path.isfile(args.input):
     sys.exit(-1)
 
 try:
-    output_file =open(args.output_basename + ".tf", "w", encoding="utf-8")
+    output_file = open(args.output_basename + ".tf", "w", encoding="utf-8")
 except OSError as e:
     console.print(f"⛔ [bold]can't create output file '{args.output_basename}.tf', aborting: {e}")
     sys.exit(-1)
@@ -178,7 +178,8 @@ else:
     console.print("⚠️ no [bold]default services[/bold] file found.")
 
 formats = {
-    "iptables": format_iptables
+    "iptables": format_iptables,
+    "csv": format_csv
 }
 
 nat_rules = []
@@ -331,11 +332,14 @@ with open (args.output_basename + "-services.tf", "w", encoding="utf-8") as serv
 console.print(f"🧾 generating policies and vips file [bold]{args.output_basename}.tf[/bold] file.")
 
 with open(args.output_basename + ".tf", "w", encoding="utf-8") as output_tf:
-    vip_ix = 1
+    vip_ix = 0
     for nat_rule in nat_rules:
-        if nat_rule.protocol.id not in [6,17]:
-            vip_ix += 1
+        vip_ix += 1
 
+        if nat_rule.protocol.id not in [6,17]:
+            continue
+
+        if not nat_rule.is_valid():
             continue
 
         vip_name = f"vip-{vip_ix:03}-"
@@ -379,6 +383,5 @@ with open(args.output_basename + ".tf", "w", encoding="utf-8") as output_tf:
             policy_service=service_name
         ))
 
-        vip_ix += 1
-
+output_file.close()
 console.print("👍 done.")

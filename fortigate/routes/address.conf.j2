@@ -1,0 +1,9 @@
+
+resource "fortios_firewall_address" "{{ resource_name }}" {
+  allow_routing = "{{ allow_routing | default('disable') }}"
+  color         = {{ color | default(0) }}
+  name          = "{{ name | default(resource_name)}}"
+  subnet        = "{{ ip.ip }} {{ ip.network.netmask }}"
+  type          = "ipmask"
+}
+

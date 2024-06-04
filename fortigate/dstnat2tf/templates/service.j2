@@ -1,5 +1,5 @@
 {% for name, data in services.services | dictsort -%}
-{% if 1 %} 
+{% if not data.built_in %} 
 resource "fortios_firewallservice_custom" "{{ name }}" {
   name          = "{{ name }}"
   protocol      = "TCP/UDP/SCTP"
